@@ -24,10 +24,24 @@ def fetch_all_chinese_code():
                     code = arr[-1]
                 else:
                     name, code = arr
-                ret.append( (name.decode('gb18030'), code) )
+                ret.append( (name.decode('gb18030').encode('utf-8'), code) )
     return ret
 
+def fetch_all_us_code():
+    f = urllib.urlopen('http://quote.eastmoney.com/usstocklist.html')
+    ret = []
+    r = re.compile('<li><a target="_blank" href="http://quote.eastmoney.com/us/([^"]*).html" title="([^"]*)">[^<]*</a></li>')
+    for line in f.readlines():
+        while 1:
+            m = r.search(line)
+            if not m:
+                break
+            code, name = m.groups()
+            ret.append( (name.decode('gb18030').encode('utf-8'), code) )
+            line = line[m.end():]
+    return ret 
+
 if __name__ == '__main__':
-    ret = fetch_all_chinese_code()
+    ret = fetch_all_us_code()
     for name, code in ret:
-        print '%s\t%s' % (name.encode('utf-8'), code)
+        print '%s\t%s' % (name, code)
